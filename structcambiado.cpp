@@ -528,7 +528,7 @@ bool crearArchivo(const string& nombreCompleto) {
 
 // --------------------------
 // FUNCIÓN PRINCIPAL
-// --------------------------
+// -------------------------
 
 int main() {
     SetConsoleOutputCP(CP_UTF8);
