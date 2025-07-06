@@ -129,7 +129,7 @@ void mostrarArbolEstructura(Directorio* dir, int nivel = 0, bool esUltimo = fals
 }
 void mostrarSistemaArchivos() {
     if (directorioActual == nullptr) {
-        cout << "ERROR: Directorio actual no establecido" << endl;
+        cout << ROJO << "ERROR: Directorio actual no establecido" << RESET << endl;
         return;
     }
     mostrarArbolEstructura(directorioActual);
@@ -338,7 +338,7 @@ bool cargarDesdeArchivo(const string& nombreArchivo) {
     ifstream archivo(nombreArchivo);
     
     if (!archivo) {
-        cout << "ERROR: No se encontró el archivo: " << nombreArchivo << endl;
+        cout << ROJO << "ERROR: No se encontró el archivo: " << nombreArchivo << RESET << endl;
         return false;
     }
 
@@ -363,11 +363,11 @@ bool cargarDesdeArchivo(const string& nombreArchivo) {
 
     archivo.close();
 
-    cout << "\n¡Proceso completado!" << endl;
+    /*cout << "\n¡Proceso completado!" << endl;
     cout << "  - Lineas leídas: " << totalLineas << endl;
     cout << "  - Rutas procesadas: " << lineasProcesadas << endl;
     cout << "  - Lineas vacías ignoradas: " << (totalLineas - lineasProcesadas) << endl;
-    cout << "" << endl;
+    cout << "" << endl;*/
 
     return true;
 }
@@ -495,13 +495,14 @@ void pwd() {
     else {
         cout << ruta << endl;
     }
+    cout<<directorioActual->rutaAbsoluta<<endl;
 }
 
 // ----- LS -----
 // Función para listar los contenidos del directorio actual
 void listarDirectorioActual() {
     if (directorioActual == nullptr) {
-        cout << "ERROR No hay directorio actual definido" << endl;
+        cout << ROJO << "ERROR No hay directorio actual definido" << RESET << endl;
         return;
     }
 
@@ -567,23 +568,23 @@ void listarDirectorioActual() {
 // Función para crear un nuevo directorio en el directorio actual
 bool crearDirectorioCmd(const string& nombre) {
     if (directorioActual == nullptr) {
-        cout << "ERROR No se puede crear en la ubicación actual" << endl;
+        cout << ROJO << "ERROR No se puede crear en la ubicación actual" << RESET << endl;
         return false;
     }
     
     if (nombre.empty()) {
-        cout << "ERROR Nombre no puede estar vacío" << endl;
+        cout << ROJO << "ERROR Nombre no puede estar vacío" << RESET <<endl;
         return false;
     }
     // Rechazar si parece archivo (contiene punto)
     if (nombre.find('.') != string::npos) {
-        cout << "ERROR No se permiten puntos en nombres de directorio" << endl;
+        cout << ROJO << "ERROR No se permiten puntos en nombres de directorio" << RESET <<endl;
         return false;
     }
 
     if (buscarSubdirectorio(directorioActual, nombre) != nullptr || 
         buscarArchivo(directorioActual, nombre) != nullptr) {
-        cout << "ERROR Ya existe '" << nombre << "' en este directorio" << endl;
+        cout << ROJO << "ERROR Ya existe '" << nombre << "' en este directorio" << RESET <<endl;
         return false;
     }
 
@@ -591,19 +592,19 @@ bool crearDirectorioCmd(const string& nombre) {
     Directorio* nuevoDir = crearDirectorio(nombre, directorioActual);
     agregarSubdirectorio(directorioActual, nuevoDir);
     
-    cout << "Directorio '" << nombre << "' creado exitosamente" << endl;
+    cout << VERDE << "Directorio '" << nombre << "' creado exitosamente" << RESET << endl;
     return true;
 }
 // ----- RM -----
 // Función auxiliar para eliminación recursiva
 bool eliminarArchivoODirectorio(const string& nombre) {
     if (directorioActual == nullptr) {
-        cout << "ERROR: No se puede eliminar en la ubicación actual" << endl;
+        cout << ROJO << "ERROR: No se puede eliminar en la ubicación actual" << RESET <<endl;
         return false;
     }
 
     if (nombre.empty()) {
-        cout << "ERROR: Nombre no puede estar vacío" << endl;
+        cout << ROJO << "ERROR: Nombre no puede estar vacío" << RESET << endl;
         return false;
     }
 
@@ -624,7 +625,7 @@ bool eliminarArchivoODirectorio(const string& nombre) {
         }
         
         destruirDirectorio(dirActual);
-        cout << "Directorio '" << nombre << "' eliminado exitosamente" << endl;
+        cout << VERDE << "Directorio '" << nombre << "' eliminado exitosamente" << RESET << endl;
         return true;
     }
 
@@ -644,11 +645,11 @@ bool eliminarArchivoODirectorio(const string& nombre) {
         }
         
         delete archActual;
-        cout << "Archivo '" << nombre << "' eliminado exitosamente" << endl;
+        cout << VERDE << "Archivo '" << nombre << "' eliminado exitosamente" << RESET << endl;
         return true;
     }
 
-    cout << "ERROR: No existe '" << nombre << "' en este directorio" << endl;
+    cout << ROJO << "ERROR: No existe '" << nombre << "' en este directorio" << RESET <<endl;
     return false;
 }
 
@@ -656,55 +657,59 @@ bool eliminarArchivoODirectorio(const string& nombre) {
 // Función para crear un nuevo archivo de texto en el directorio actual
 bool crearArchivoCmd(const string& nombreCompleto) {
     if (directorioActual == nullptr) {
-        cout << "ERROR: No se puede crear archivos en la ubicación actual" << endl;
+        cout << ROJO << "ERROR: No se puede crear archivos en la ubicación actual" << RESET << endl;
         return false;
     }
     // Validación del nombre
     if (nombreCompleto.empty()) {
-        cout << "ERROR: El nombre del archivo no puede estar vacío" << endl;
+        cout << ROJO <<"ERROR: El nombre del archivo no puede estar vacío" << RESET <<endl;
         return false;
     }
 
-    if (nombreCompleto.find('.') == string::npos) {
-        cout << "ERROR: El nombre debe contener una extensión (ej: archivo.txt)" << endl;
+    // Validar extensión .txt
+    size_t punto = nombreCompleto.find_last_of('.');
+    if (punto == string::npos || nombreCompleto.substr(punto) != ".txt") {
+        cout << ROJO << "ERROR: Solo se permiten archivos con extensión .txt" << RESET << endl;
         return false;
     }
 
     // Extraer nombre base (sin extensión)
-    size_t punto = nombreCompleto.find_last_of('.');
     string nombreBase = nombreCompleto.substr(0, punto);
 
     // Verificar si ya existe como directorio o archivo
     if (buscarSubdirectorio(directorioActual, nombreBase) != nullptr || 
         buscarArchivo(directorioActual, nombreBase) != nullptr) {
-        cout << "ERROR: Ya existe '" << nombreCompleto << "' en este directorio" << endl;
+        cout << ROJO << "ERROR: Ya existe '" << nombreCompleto << "' en este directorio" << RESET <<endl;
         return false;
     }
     // Crear el nuevo archivo 
     Archivo* nuevoArchivo = crearArchivo(nombreCompleto);
     nuevoArchivo->rutaAbsoluta = directorioActual->rutaAbsoluta + nombreCompleto;
     agregarArchivo(directorioActual, nuevoArchivo);
+    // Crear el archivo físico primero
+    ofstream archivoFisico(nombreCompleto);
+    archivoFisico.close();
     
-    cout << "Archivo '" << nombreCompleto << "' creado exitosamente" << endl;
+    cout << VERDE << "Archivo '" << nombreCompleto << "' creado exitosamente" << RESET << endl;
     return true;
 }
 // ----- MV -----
 // Función para renombrar un archivo o directorio
 bool renombrarElemento(const string& nombreActual, const string& nuevoNombre) {
     if (directorioActual == nullptr) {
-        cout << "ERROR: No se puede renombrar en la ubicación actual" << endl;
+        cout << ROJO <<"ERROR: No se puede renombrar en la ubicación actual" << RESET <<endl;
         return false;
     }
 
     if (nombreActual.empty() || nuevoNombre.empty()) {
-        cout << "ERROR: Nombre actual y nuevo nombre no pueden estar vacíos" << endl;
+        cout << ROJO << "ERROR: Nombre actual y nuevo nombre no pueden estar vacíos" << RESET << endl;
         return false;
     }
 
     // Verificar si el nuevo nombre ya existe
     if (buscarSubdirectorio(directorioActual, nuevoNombre) != nullptr || 
         buscarArchivo(directorioActual, nuevoNombre) != nullptr) {
-        cout << "ERROR: Ya existe un elemento con el nombre '" << nuevoNombre << "' en este directorio" << endl;
+        cout << ROJO << "ERROR: Ya existe un elemento con el nombre '" << nuevoNombre << "' en este directorio" << RESET <<endl;
         return false;
     }
 
@@ -753,7 +758,7 @@ bool renombrarElemento(const string& nombreActual, const string& nuevoNombre) {
                 }
             }
             
-            cout << "Directorio '" << nombreOriginal << "' renombrado a '" << nuevoNombre << "' exitosamente" << endl;
+            cout << VERDE << "Directorio '" << nombreOriginal << "' renombrado a '" << nuevoNombre << "' exitosamente" << RESET << endl;
             return true;
         }
         anteriorDir = dirActual;
@@ -764,7 +769,7 @@ bool renombrarElemento(const string& nombreActual, const string& nuevoNombre) {
     Archivo* anteriorArch = nullptr;
     Archivo* archActual = directorioActual->primerArchivo;
     while (archActual != nullptr) {
-        cout<< "Nombre actual: " << archActual->nombre<<" y"<<archActual->extension << " Ingresado: "<<nombreActual<<endl;
+        //cout<< "Nombre actual: " << archActual->nombre<<" y"<<archActual->extension << " Ingresado: "<<nombreActual<<endl;
         if (archActual->nombre+"."+archActual->extension == nombreActual) {
             // Guardar nombre y extensión originales
             string nombreOriginal = archActual->nombre;
@@ -786,7 +791,7 @@ bool renombrarElemento(const string& nombreActual, const string& nuevoNombre) {
                 archActual->rutaAbsoluta += "." + archActual->extension;
             }
             
-            cout << "Archivo '" << nombreOriginal;
+            cout << VERDE << "Archivo '" << nombreOriginal;
             if (!extensionOriginal.empty()) {
                 cout << "." << extensionOriginal;
             }
@@ -794,7 +799,7 @@ bool renombrarElemento(const string& nombreActual, const string& nuevoNombre) {
             if (!archActual->extension.empty()) {
                 cout << "." << archActual->extension;
             }
-            cout << "' exitosamente" << endl;
+            cout << "' exitosamente" << RESET << endl;
             
             return true;
         }
@@ -802,26 +807,36 @@ bool renombrarElemento(const string& nombreActual, const string& nuevoNombre) {
         archActual = archActual->siguiente;
     }
 
-    cout << "ERROR: No existe '" << nombreActual << "' en este directorio" << endl;
+    cout << ROJO <<"ERROR: No existe '" << nombreActual << "' en este directorio" << RESET <<endl;
     return false;
 }
 // ----- NANO -----
 // Función para editar archivos usando nano
 bool nanoArchivo(const string& nombreCompleto) {
     if (directorioActual == nullptr) {
-        cout << "ERROR: No se puede editar en la ubicación actual" << endl;
+        cout << ROJO << "ERROR: No se puede editar en la ubicación actual" << RESET << endl;
         return false;
     }
 
     if (nombreCompleto.empty()) {
-        cout << "ERROR: Nombre de archivo no puede estar vacío" << endl;
+        cout << ROJO << "ERROR: Nombre de archivo no puede estar vacío" << RESET << endl;
+        return false;
+    }
+    // Validar extensión .txt
+    size_t punto = nombreCompleto.find_last_of('.');
+    if (punto == string::npos) {
+        cout << ROJO << "ERROR: El archivo debe tener extensión .txt" << RESET << endl;
+        return false;
+    }
+    
+    string extension = nombreCompleto.substr(punto);
+    if (extension != ".txt") {
+        cout << ROJO << "ERROR: Solo se permiten archivos con extensión .txt" << RESET <<endl;
         return false;
     }
 
-    // Extraer nombre base (sin extensión)
-    size_t punto = nombreCompleto.find_last_of('.');
     string nombreBase = (punto != string::npos) ? nombreCompleto.substr(0, punto) : nombreCompleto;
-
+ 
     // Buscar el archivo en el directorio actual
     Archivo* arch = buscarArchivo(directorioActual, nombreBase);
     if (!arch) {
@@ -833,13 +848,12 @@ bool nanoArchivo(const string& nombreCompleto) {
     //string rutaCompleta = directorioActual->rutaAbsoluta + nombreCompleto;
     
     // Leer contenido actual del archivo
-    cout<<"nombre: "<<nombreCompleto<<endl;
     ifstream archivoEntrada(nombreCompleto);
     string contenido;
     string linea;
     
     if (archivoEntrada.is_open()) {
-        cout<<"ENTRA ARCHIVO ENTRADA"<<endl;
+        //cout<<"ENTRA ARCHIVO ENTRADA"<<endl;
         while (getline(archivoEntrada, linea)) {
             cout<<"LINEA: "<<linea<<endl;
             contenido += linea + "\n";
@@ -880,39 +894,15 @@ bool nanoArchivo(const string& nombreCompleto) {
     if (archivoSalida.is_open()) {
         archivoSalida << nuevoContenido;
         archivoSalida.close();
-        cout << "Se agregaron " << nuevoContenido.size() << " bytes al final de " << nombreCompleto << endl;
+        cout << VERDE << "Se editó " << nombreCompleto << " exitosamente" << RESET << endl;
     } else {
-        cout << "Error: No se pudo abrir el archivo para escritura" << endl;
+        cout << ROJO << "ERROR: No se pudo abrir el archivo para escritura" << RESET << endl;
         return false;
     }
     
     return true;
 }
-////////"EDITAR EL CONTENIDO SOBRE ESCRIBIENDO"
-/*
-cout << contenidoEditado;
-    
-    string inputLine;
-    contenidoEditado = "";  // Reiniciar para capturar todo
-    
-    // Leer hasta que el usuario ingrese ":wq"
-    while (true) {
-        getline(cin, inputLine);
-        
-        if (inputLine == ":wq") {
-            break;
-        }
-        
-        contenidoEditado += inputLine + "\n";
-    }
-    
-    // Guardar el nuevo contenido en el archivo (sobreescribiendo)
-    ofstream archivoSalida(nombreCompleto);
-    if (archivoSalida.is_open()) {
-        archivoSalida << contenidoEditado;
-        archivoSalida.close();
-        cout << "Se guardaron " << contenidoEditado.size() << " bytes en " << nombreCompleto << endl;
-*/
+
 void guardarDirectorioEnArchivo(Directorio* dir, ofstream& archivoSalida) {
     if (dir == nullptr) return;
 
@@ -944,7 +934,7 @@ void guardarDirectorioEnArchivo(Directorio* dir, ofstream& archivoSalida) {
 void guardarSistemaArchivos(const string& nombreArchivo) {
     ofstream archivoSalida(nombreArchivo);
     if (!archivoSalida) {
-        cout << "ERROR: No se pudo abrir el archivo para guardar: " << nombreArchivo << endl;
+        cout << ROJO << "ERROR: No se pudo abrir el archivo para guardar: " << nombreArchivo << RESET << endl;
         return;
     }
 
@@ -970,12 +960,12 @@ int main() {
 
     cout << "Cargando estructura desde '" << archivoEntrada << "'..." << endl;
 
-    if (!cargarDesdeArchivo("Ejemplo1.txt")) {
+    if (!cargarDesdeArchivo(archivoEntrada)) {
         cout << "ADVERTENCIA: No se pudo cargar el archivo inicial" << endl;
         cout << "             Recuerde agregarlo al output\n" << endl;
-        return 1;
+        cout << "Sus directorios inicializaran vacios\n" << endl;
     }
-    mostrarSistemaArchivos();  // Mostrar estructura inicial
+    //mostrarSistemaArchivos();  // Mostrar estructura inicial
     string comando;
     
     while (true) {
@@ -993,7 +983,7 @@ int main() {
             if (!nombreDir.empty()) {
                 crearDirectorioCmd(nombreDir);
             } else {
-                cout << "ERROR Nombre de directorio no válido" << endl;
+                cout << ROJO << "ERROR Nombre de directorio no válido" << RESET << endl;
             }
         }
         // Procesar comando cd
@@ -1011,7 +1001,7 @@ int main() {
             if (!nombre.empty()) {
                 eliminarArchivoODirectorio(nombre);
             } else {
-                cout << "ERROR Nombre no válido" << endl;
+                cout << ROJO << "ERROR Nombre no válido" << RESET <<endl;
             }
         }
         // Procesar comando ls
@@ -1029,7 +1019,7 @@ int main() {
             if (!nombreArchivo.empty()) {
                 crearArchivoCmd(nombreArchivo);
             } else {
-                cout << "ERROR: Nombre de archivo no válido" << endl;
+                cout << ROJO << "ERROR: Nombre de archivo no válido" << RESET << endl;
             }
         }// Comando NANO
         else if (comando.find("nano ") == 0) {
@@ -1038,7 +1028,7 @@ int main() {
             if (!nombreArchivo.empty()) {
                 nanoArchivo(nombreArchivo);
             } else {
-                cout << "ERROR: Nombre de archivo no válido" << endl;
+                cout << ROJO << "ERROR: Nombre de archivo no válido" << RESET <<endl;
             }
         }
         else if (comando.find("mv ") == 0) {
@@ -1046,7 +1036,7 @@ int main() {
             string argumentos = comando.substr(3);
             size_t espacio = argumentos.find(' ');
             if (espacio == string::npos) {
-                cout << "ERROR: Formato incorrecto. Uso: mv <actual> <nuevo>" << endl;
+                cout << ROJO << "ERROR: Formato incorrecto. Uso: mv <actual> <nuevo>" << RESET <<endl;
             } else {
                 string nombreActual = argumentos.substr(0, espacio);
                 string nuevoNombre = argumentos.substr(espacio + 1);
@@ -1060,7 +1050,7 @@ int main() {
                 if (!nombreActual.empty() && !nuevoNombre.empty()) {
                     renombrarElemento(nombreActual, nuevoNombre);
                 } else {
-                    cout << "ERROR: Nombre actual y nuevo nombre no pueden estar vacíos" << endl;
+                    cout << ROJO << "ERROR: Nombre actual y nuevo nombre no pueden estar vacíos" << RESET <<endl;
                 }
             }
         }
@@ -1073,22 +1063,7 @@ int main() {
         }
         else {
             cout << ROJO << " ERROR: El comando que ha ingresado es incorrecto" << RESET << endl;
-            cout << "---------------------------------------------------" << endl;
-            cout << "  Comandos disponibles:" << endl;
-            cout << "  cd <ruta>       - Cambiar directorio" << endl;
-            cout << "  cd .            - Quedarse en directorio actual " << endl;
-            cout << "  cd /            - Ir al directorio raíz  " << endl;
-            cout << "  cd ..           - Subir al directorio padre" << endl;
-            cout << "  cd ~            - Ir a carpeta personal" << endl;
-            cout << "  ls              - Listar contenidos" << endl;
-            cout << "  mkdir <nombre>  - Crear nuevo directorio" << endl;
-            cout << "  rm <nombre>     - Eliminar archivo/directorio" << endl;
-            cout << "  pwd             - Mostrar directorio actual" << endl;
-            cout << "  touch <nombre>  - Crear archivo tetxo plano" << endl;
-            cout << "  mv <actual> <nuevo> - Renombrar archivo o directorio" << endl;
-            cout << "  nano <archivo>  - Editar contenido de un archivo" << endl;
-            cout << "  exit            - Salir de la terminal" << endl;
-            cout << "---------------------------------------------------" << endl;
+            Comandos();
         }
     }
     
@@ -1100,6 +1075,3 @@ int main() {
             
     return 0;
 }
-
-
-//fin
