@@ -552,7 +552,7 @@ int main() {
     }
     
     string comando;
-    
+    //estructura
     while (true) {
         mostrarPrompt();
         getline(cin, comando);
@@ -609,6 +609,7 @@ int main() {
             break;
         }
         else {
+            
             cout << ROJO << " ERROR: El comando que ha ingresado es incorrecto" << RESET << endl;
             cout << "---------------------------------------------------" << endl;
             cout << "  Comandos disponibles:" << endl;
