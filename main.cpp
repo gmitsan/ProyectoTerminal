@@ -632,7 +632,7 @@ bool eliminarArchivoODirectorio(const string& nombre) {
     // Si no era directorio, buscar en archivos
     Archivo* anteriorArch = nullptr;
     Archivo* archActual = directorioActual->primerArchivo;
-    while (archActual != nullptr && archActual->nombre != nombre) {
+    while (archActual != nullptr && archActual->nombre + "." + archActual->extension != nombre) {
         anteriorArch = archActual;
         archActual = archActual->siguiente;
     }
@@ -810,6 +810,7 @@ bool renombrarElemento(const string& nombreActual, const string& nuevoNombre) {
     cout << ROJO <<"ERROR: No existe '" << nombreActual << "' en este directorio" << RESET <<endl;
     return false;
 }
+
 // ----- NANO -----
 // Función para editar archivos usando nano
 bool nanoArchivo(const string& nombreCompleto) {
@@ -943,8 +944,8 @@ void guardarSistemaArchivos(const string& nombreArchivo) {
     
     cout << "Se guardó el estado del sistema de archivos en '" << nombreArchivo << "'" << endl;
 }
-// ----- PROGRAMA PRINCIPAL -----
 
+// ----- PROGRAMA PRINCIPAL -----
 int main() {
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
